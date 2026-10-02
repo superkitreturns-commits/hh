@@ -10,7 +10,6 @@ const URLS = [
 (async () => {
   const browser = await chromium.launch({
     headless: true,
-    executablePath: '/opt/pw-browsers/chromium',
     args: [
       '--incognito',
       '--no-sandbox',
