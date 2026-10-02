@@ -96,21 +96,29 @@ const URLS = [
     if (submit) await submit.click();
     else await page.keyboard.press('Enter');
 
-    await page.waitForTimeout(5000);
+    // Wait for either the error to appear OR the password field to become visible
+    await Promise.race([
+      page.waitForSelector('#username-error:not(:empty), p.error-msg:visible, .error-msg:visible', { timeout: 15000 }).catch(() => null),
+      page.waitForSelector('#login-passwd:visible, input[name="password"]:visible', { state: 'visible', timeout: 15000 }).catch(() => null),
+      page.waitForTimeout(8000),
+    ]);
 
-    const errorEl = await page.$('#username-error, .error-msg, [data-error]');
-    const errorText = errorEl ? (await errorEl.innerText()).trim() : '';
-    const passwordVisible = await page.$('#login-passwd, input[name="password"]');
+    const bodyText = (await page.locator('body').innerText()).toLowerCase();
+    const notRecognized = /don'?t recognize|not recognize|no account exists|sorry, we don'?t/i.test(bodyText);
 
-    if (errorText && /don'?t recognize|not recognize|no account|invalid/i.test(errorText)) {
-      console.log('[LOG] Mail not login:', errorText);
+    const pwField = await page.$('#login-passwd, input[name="password"]');
+    const pwVisible = pwField ? await pwField.isVisible() : false;
+
+    if (notRecognized) {
       console.log("[LOG] Sorry, we don't recognize this email.");
-    } else if (passwordVisible) {
+    } else if (pwVisible) {
       console.log('[LOG] Password page shown. Asking for password.');
       console.log('[LOG] Password: <enter password here>');
     } else {
-      console.log('[LOG] URL:', page.url(), '| error:', errorText || '(none)');
-      console.log('[LOG] snippet:', (await page.locator('body').innerText()).slice(0, 400));
+      const errEl = await page.$('#username-error, .error-msg');
+      const errTxt = errEl ? (await errEl.innerText()).trim() : '';
+      console.log('[LOG] URL:', page.url(), '| error:', errTxt || '(none)');
+      console.log('[LOG] snippet:', bodyText.slice(0, 400));
     }
   } catch (e) {
     console.log('[ERROR]', e.message.split('\n')[0]);
