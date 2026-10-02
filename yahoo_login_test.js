@@ -1,6 +1,6 @@
 const { chromium, devices } = require('playwright');
 
-const EMAIL = 'xadrbithethankmo@yahoo.com';
+const EMAIL = process.env.EMAIL || process.argv[2] || 'xadrbithethankmo@yahoo.com';
 const URLS = [
   'https://login.yahoo.com/',
   'https://login.yahoo.com/?.src=ym&done=https%3A%2F%2Fmail.yahoo.com',
