@@ -18,7 +18,15 @@ const URLS = [
       '--disable-features=IsolateOrigins,site-per-process',
       '--disable-dev-shm-usage',
     ],
-    proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY } : undefined,
+    proxy: process.env.PROXY_SERVER
+      ? {
+          server: process.env.PROXY_SERVER,
+          username: process.env.PROXY_USER,
+          password: process.env.PROXY_PASS,
+        }
+      : process.env.HTTPS_PROXY
+      ? { server: process.env.HTTPS_PROXY }
+      : undefined,
   });
 
   const context = await browser.newContext({
