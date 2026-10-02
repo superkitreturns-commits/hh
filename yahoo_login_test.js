@@ -6,9 +6,18 @@ const EMAIL = 'xadrbithethankmo@yahoo.com';
   const browser = await chromium.launch({
     headless: true,
     executablePath: '/opt/pw-browsers/chromium',
+    args: ['--incognito', '--no-sandbox', '--disable-blink-features=AutomationControlled'],
     proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY } : undefined,
   });
-  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+    viewport: { width: 1280, height: 800 },
+    locale: 'en-US',
+  });
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+  });
   const page = await context.newPage();
 
   try {
