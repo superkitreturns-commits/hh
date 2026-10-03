@@ -38,12 +38,19 @@ async function newContext(browser) {
   return context;
 }
 
+function loginUrlFor(email) {
+  const domain = (email.split('@')[1] || '').toLowerCase();
+  const aolDomains = new Set(['aol.com', 'verizon.net', 'aim.com', 'love.com', 'games.com', 'wow.com']);
+  if (aolDomains.has(domain)) return 'https://login.aol.com/';
+  return 'https://login.yahoo.com/';
+}
+
 async function checkOnPage(page, email) {
   const t0 = Date.now();
   let result = 'UNKNOWN';
   let detail = '';
   try {
-    await page.goto('https://login.yahoo.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.goto(loginUrlFor(email), { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForSelector('input[name="username"], #login-username', { timeout: 15000 });
     await page.fill('input[name="username"], #login-username', email);
 
